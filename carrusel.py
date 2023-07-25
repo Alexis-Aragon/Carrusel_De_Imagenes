@@ -1,75 +1,122 @@
+"""Carrusel es un visor de imágenes"""
+
 from tkinter import *
 from PIL import Image, ImageTk
 import os
 from math import e
+from tkinter import filedialog # para que el usuario elija el archivo o directorio
 
-pictureFolderWin = r"C:\Users\Alexis Aragon\OneDrive\Imágenes/"
-
-ASUS = r"C:\Users\Alexis Aragon\OneDrive\Imágenes\ASUS/"
 
 root = Tk()
 root.title('Carrusel')
+root.geometry('1020x750')
+root.minsize(1020,750)
+
+# Ajustar al tamaño de la ventana
+n_rows = 2
+n_columns = 3
+for i in range(n_rows):
+    root.grid_rowconfigure(i,  weight =1)
+for i in range(n_columns):
+    root.grid_columnconfigure(i,  weight =1)
 
 
-# len = len(os.listdir(pictureFolderWin))
-# print(len)
+fname = [] # donde se guardaran los nombre de los archivos
+img = ImageTk.PhotoImage(Image.open(r"C:\Users\Alexis Aragon\OneDrive\Imágenes/muslos.jpg")) # imagen de la ventana inicial
+img_num = 0
+dir = '' # donde se guardará el directorio
 
-# Buscar archivos en directorio
+#------------------------------#------------------------------------#
+# Función para que el usuario seleccione un directorio donde buscar
+def open():
 
-cont = 1
-
-for filename in os.listdir(pictureFolderWin): 
-    name, extension = os.path.splitext(pictureFolderWin + filename)
-    
-    if extension in [".jpg", ".jpeg"]:
-        os.rename(pictureFolderWin + filename, ASUS + 'name' + str(cont) + '.jpg')
-        cont+=1
-      
-Lista = []
-for i in range(1, len(os.listdir(ASUS))):
-    img = Image.open(ASUS + 'name' + str(i) + '.jpg')
-    w, h = img.size
-    if h > 800:
-        z = 1.2651*e**(-6*10**(-4)*h) # porcentaje en que se modificará el ancho de la imagen para mantener la relación de aspecto
-        img = img.resize((int(w*z), int(742))) 
-    img = ImageTk.PhotoImage(img)
-    Lista.append(img)
-
-
-# Lista = []
-# for i in range(1,6):
-#     img = ImageTk.PhotoImage(Image.open('images/' + str(i) + '.png'))
-#     Lista.append(img)
-    
-l = Label(root, image=Lista[0], height=742, width=1020)
-l.grid(row=0, column=0, columnspan=3)
-
-def pasar(img_num):
     global l
+    global lname
     global btn_next
     global btn_back
+    global dir    
 
-    l.grid_forget() # olvidar lo que esta dentro de la grilla
+    dir = filedialog.askdirectory(initialdir=r"C:\Users\Alexis Aragon\OneDrive\Imágenes/")
+    dir = str(dir) + '/'  
+
+    fname.clear()
+   
+    for i in os.listdir(dir):
+        fname.append(i)
+
+    getImage(dir, img_num)
+
+    lname = Label(root, text=fname[img_num])
+    lname.grid(row=0, column=1)
+    l = Label(root, image=img, height=750, width=1020, )
+    l.grid(row=1, column=0, columnspan=3)
+
+    btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=1)
+    btn_next = Button(root, text='->', command=lambda: pasar(1), borderwidth=1)
+
+    # btn_back = customtkinter.CTkButton(master=root, text='N/A', state=DISABLED, width=0, height=0, fg_color="#262626", hover_color="#262626")
+
+    btn_back.grid(row=1, column=0, sticky=W, ipady=340, ipadx=50)
+    btn_next.grid(row=1, column=2, sticky=E, ipady=340, ipadx=50) 
+    
+#------------------------------#------------------------------------#
+# Función para obtener imágenes y modificar las dimensiones de la misma
+def getImage(dir, img_num):  
+    global img
+    
+    l.grid_forget()
+    lname.grid_forget() 
+
+    img = Image.open(dir + fname[img_num])
+    w, h = img.size
+    if h >= 800:
+        z = 1.2651*e**(-6*10**(-4)*h) # porcentaje en que se modificará el ancho de la imagen para mantener la relación de aspecto
+        img = img.resize((int(w*z), int(720)))
+
+    img = ImageTk.PhotoImage(img)
+    return img
+      
+#------------------------------#------------------------------------#
+# Función para cambiar a la imagen siguiente o anterior
+def pasar(num):
+    global l
+    global lname
+    global btn_next
+    global btn_back
+    
+    img_num = num
     btn_back.grid_forget()
     btn_next.grid_forget()
-    l = Label(root, image=Lista[img_num], height=742, width=1020)
-    btn_back = Button(root, text='<-', command=lambda: pasar(img_num - 1))
-    btn_next = Button(root, text='->', command=lambda: pasar(img_num + 1))
 
-    if img_num == len(Lista)-1:
-        btn_next = Button(root, text='N/A', state=DISABLED)
+    getImage(dir, img_num)
+    
+    lname = Label(root, text=fname[img_num])
+    l = Label(root, image=img, height=750, width=1020, )
+
+    btn_back = Button(root, text='<-', command=lambda: pasar(img_num - 1), borderwidth=1)
+    btn_next = Button(root, text='->', command=lambda: pasar(img_num + 1), borderwidth=1)
+    # btn_back = customtkinter.CTkButton(master=root, text='<-', command=lambda: pasar(img_num - 1), width=0, height=0, fg_color="#262626", hover_color="#262626")
+
+    if img_num == len(fname)-1:
+        btn_next = Button(root, text='N/A', state=DISABLED, borderwidth=1)
     
     if img_num == 0:
-        btn_back = Button(root, text='N/A', state=DISABLED)
+        btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=1)
+        # btn_back = customtkinter.CTkButton(master=root, text='N/A', state=DISABLED, width=0, height=0, fg_color="#262626", hover_color="#262626")
     
-    l.grid(row=0, column=0, columnspan=3)
-    btn_back.grid(row=1, column=0)
-    btn_next.grid(row=1, column=2)
+    lname.grid(row=0, column=1)
+    l.grid(row=1, column=0, columnspan=3)
+    btn_back.grid(row=1, column=0, sticky=W, ipady=340,ipadx=50)
+    btn_next.grid(row=1, column=2, sticky=E, ipady=340,ipadx=50)
 
-btn_back = Button(root, text='N/A', state=DISABLED)
-btn_next = Button(root, text='->', command=lambda: pasar(1))
+#------------------------------#------------------------------------#
+# Se imprime la primera ventana
+btn = Button(root, text='Abrir Directorio', command=open)  
+btn.grid(row=0, column=0, sticky=W, ipady=10, ipadx=10)
 
-btn_back.grid(row=1, column=0)
-btn_next.grid(row=1, column=2)
-
+lname = Label(root, text='muslos.jpg')
+lname.grid(row=0, column=1)
+l = Label(root, image=img, height=750, width=1020, )
+l.grid(row=1, column=0, columnspan=3)
+    
 root.mainloop()
