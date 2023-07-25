@@ -6,6 +6,8 @@ import os
 from math import e
 from tkinter import filedialog # para que el usuario elija el archivo o directorio
 
+from tkinter import messagebox
+
 
 root = Tk()
 root.title('Carrusel')
@@ -42,19 +44,30 @@ def open():
     fname.clear()
    
     for i in os.listdir(dir):
-        fname.append(i)
+        name, extension = os.path.splitext(dir + i)
+        if extension == '.jpg' or extension == '.png':
+            fname.append(i)
+    if len(fname) == 0:
+        messagebox.showwarning('titulo', 'No hay imágenes en el directorio')
+        open()      
 
     getImage(dir, img_num)
+
 
     lname = Label(root, text=fname[img_num])
     lname.grid(row=0, column=1)
     l = Label(root, image=img, height=750, width=1020, )
     l.grid(row=1, column=0, columnspan=3)
 
-    btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=1)
-    btn_next = Button(root, text='->', command=lambda: pasar(1), borderwidth=1)
+    btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=0)
+    btn_next = Button(root, text='->', command=lambda: pasar(1), borderwidth=0)
 
     # btn_back = customtkinter.CTkButton(master=root, text='N/A', state=DISABLED, width=0, height=0, fg_color="#262626", hover_color="#262626")
+    if img_num == len(fname)-1:
+        btn_next = Button(root, text='N/A', state=DISABLED, borderwidth=0)
+    
+    if img_num == 0:
+        btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=0)
 
     btn_back.grid(row=1, column=0, sticky=W, ipady=340, ipadx=50)
     btn_next.grid(row=1, column=2, sticky=E, ipady=340, ipadx=50) 
@@ -93,15 +106,15 @@ def pasar(num):
     lname = Label(root, text=fname[img_num])
     l = Label(root, image=img, height=750, width=1020, )
 
-    btn_back = Button(root, text='<-', command=lambda: pasar(img_num - 1), borderwidth=1)
-    btn_next = Button(root, text='->', command=lambda: pasar(img_num + 1), borderwidth=1)
+    btn_back = Button(root, text='<-', command=lambda: pasar(img_num - 1), borderwidth=0)
+    btn_next = Button(root, text='->', command=lambda: pasar(img_num + 1), borderwidth=0)
     # btn_back = customtkinter.CTkButton(master=root, text='<-', command=lambda: pasar(img_num - 1), width=0, height=0, fg_color="#262626", hover_color="#262626")
 
     if img_num == len(fname)-1:
-        btn_next = Button(root, text='N/A', state=DISABLED, borderwidth=1)
+        btn_next = Button(root, text='N/A', state=DISABLED, borderwidth=0)
     
     if img_num == 0:
-        btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=1)
+        btn_back = Button(root, text='N/A', state=DISABLED, borderwidth=0)
         # btn_back = customtkinter.CTkButton(master=root, text='N/A', state=DISABLED, width=0, height=0, fg_color="#262626", hover_color="#262626")
     
     lname.grid(row=0, column=1)
